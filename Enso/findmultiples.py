@@ -133,44 +133,20 @@ def sum_mutliples_optimized(n, multiples):
 
 
 
-class Tester:
-    def __init__(self):
-        pass
-
-    def test_execute_time(self, n, multiples, runs=10):
-        wrapped_run = self.wrap_function_with_arguments(sum_multiples, n)
-        wrapped_run_optimized = self.wrap_function_with_arguments(sum_mutliples_optimized, n, multiples)
+class Timer:
+    @staticmethod
+    def time_execute_time(func, *args, **kwargs):
+        runs = kwargs.get("runs")
+        if runs:
+            # Don't send the kwarg 'runs' further
+            kwargs.pop("runs")
+        else:
+            runs = 100
         
-        time_to_run = timeit.timeit(wrapped_run, number=runs)
-        time_to_run_optimized = timeit.timeit(wrapped_run_optimized, number=runs)        
-        
-        print("")
-        print("It took an average of {:.4f} ms to calculate the sum of multiples for n={}".format((time_to_run * 1000) / runs, n))
-        print("It took an average of {:.4f} ms to optimally calculate the sum of multiples for n={}".format((time_to_run_optimized * 1000) / runs, n))
-    
-    def test_validity(self):
-        # Arrange
-        n1 = 10
-        n2 = 16
-        multiples = [3, 5]
+        wrapped_func = Timer.wrap_function_with_arguments(func, *args, **kwargs)        
+        time_to_run = timeit.timeit(wrapped_func, number=runs)
 
-        sum_of_multiples_under_16 = 60
-        sum_of_multiples_under_10 = 23
-        
-
-        # Act
-        result_sum_multiples_of_10 = sum_multiples(n1)
-        result_sum_multiples_optimized_of_10 = sum_mutliples_optimized(n1, multiples)
-
-        result_sum_multiples_of_16 = sum_multiples(n2)
-        result_sum_multiples_optimized_of_16 = sum_mutliples_optimized(n2, multiples)
-        
-        # Assert
-        assert result_sum_multiples_of_10 == sum_of_multiples_under_10
-        assert result_sum_multiples_optimized_of_10 == sum_of_multiples_under_10
-
-        assert result_sum_multiples_of_16 == sum_of_multiples_under_16
-        assert result_sum_multiples_optimized_of_16 == sum_of_multiples_under_16        
+        print("It took an average of {:.4f} ms to run {} with args {}".format((time_to_run * 1000) / runs, func.__name__, args))
 
     @staticmethod
     def wrap_function_with_arguments(func, *args, **kwargs):
@@ -180,14 +156,21 @@ class Tester:
 
 
 if __name__ == "__main__":
-    all_multiples_less_than = 100000
+    n = 100000
     multiples = [3, 5]
 
-    tester = Tester()
-    tester.test_execute_time(all_multiples_less_than, multiples, runs=200)
-    tester.test_execute_time(30, multiples, runs=10000)
-    tester.test_execute_time(5000000, multiples, runs=1)
-    tester.test_validity()
+    tester = Timer()
+    tester.time_execute_time(sum_multiples, n)
+    tester.time_execute_time(sum_mutliples_optimized, n, multiples, runs=100)
+    
+    n = 30
+    tester.time_execute_time(sum_multiples, n, runs=1000)
+    tester.time_execute_time(sum_mutliples_optimized, n, multiples, runs=1000)
+    
+    n = 5000000
+    tester.time_execute_time(sum_multiples, n, runs=1)
+    tester.time_execute_time(sum_mutliples_optimized, n, multiples, runs=1)
 
-    print("\nThe sum of all multiples of 3 and 5 under {} is {}".format(all_multiples_less_than, sum_multiples(all_multiples_less_than)))
-    print("Optimized: The sum of all multiples of {} under {} is {}".format(multiples, all_multiples_less_than, sum_mutliples_optimized(all_multiples_less_than, multiples)))
+    n = 10
+    print("\nThe sum of all multiples of 3 and 5 under {} is {}".format(n, sum_multiples(n)))
+    print("Optimized: The sum of all multiples of {} under {} is {}".format(multiples, n, sum_mutliples_optimized(n, multiples)))
